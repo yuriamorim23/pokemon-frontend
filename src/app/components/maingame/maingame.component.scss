@@ -1,0 +1,133 @@
+.game-container {
+  text-align: center;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+
+  .title {
+    font-size: 2.5rem;
+    color: #007bff;
+    text-shadow: 1px 1px 3px #000;
+    margin-bottom: 20px;
+  }
+
+  .silhouette img {
+    width: 200px;
+    height: auto;
+    margin: 20px auto;
+    border: 5px solid #ccc;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgb(93, 128, 223);
+    filter: brightness(0);
+    transition: filter 0.5s ease;
+  }
+
+  .silhouette img.reveal {
+    filter: brightness(1);
+  }
+
+  .options {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+
+    button {
+      width: 120px;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+
+      &:hover:not([disabled]) {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
+      }
+
+      &[disabled] {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+    }
+  }
+
+  .score {
+    margin-top: 30px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #099c2b;
+
+    span {
+      color: #000000;
+    }
+  }
+
+  .message {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+
+    &.correct {
+      color: #28a745;
+    }
+
+    &.wrong {
+      color: #dc3545;
+    }
+  }
+
+  .loading {
+    font-size: 1.5rem;
+    color: #007bff;
+    font-weight: bold;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+  }
+
+  .pokeball {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(to bottom, red 50%, #e6e6e6 50%);
+    border: 5px solid black;
+    border-radius: 50%;
+    position: relative;
+    animation: spin 1s linear infinite;
+  
+    &:before {
+      content: '';
+      position: absolute;
+      top: 48%;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: black;
+    }
+  
+    &:after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: white;
+      border: 5px solid black;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

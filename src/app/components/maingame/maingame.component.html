@@ -1,0 +1,33 @@
+<div class="game-container">
+  <h1 class="title">Who's That Pokémon?</h1>
+
+  <div class="score">
+    <p>Score: <span>{{ score }}</span></p>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="pokeball"></div>
+    <p>Loading...</p>
+  </div>
+
+  <div *ngIf="!loading" class="game-content">
+    <div class="silhouette">
+      <img [src]="silhouetteUrl" [ngClass]="{ 'reveal': revealPokemon }" alt="Pokemon Silhouette" draggable="false"/>
+    </div>    
+
+    <div class="options">
+      <button
+        *ngFor="let option of options"
+        (click)="verifyGuess(option)"
+        [disabled]="disableOptions"
+        class="btn btn-outline-primary"
+      >
+        {{ option }}
+      </button>
+    </div>
+
+    <div class="message" [ngClass]="{ 'correct': message.includes('Correct'), 'wrong': message.includes('Wrong') }">
+      <p>{{ message }}</p>
+    </div>
+  </div>
+</div>
