@@ -25,9 +25,11 @@ export class MainGameComponent implements OnInit {
   disableOptions: boolean = false;
   revealPokemon: boolean = false;
   answerState: AnswerState = AnswerState.None;
-  availablePokemonIds: number[] = [];
   gameFinished: boolean = false;
   answerStateEnum = AnswerState; // Exposing AnswerState for the template
+
+  private maxRounds: number = 20; // Define um limite para o jogo
+  private totalPokemon: number = 150; // Define o total de Pokémons disponíveis
 
   constructor(private pokemonService: PokemonService) {}
 
@@ -36,7 +38,6 @@ export class MainGameComponent implements OnInit {
   }
 
   resetGame(): void {
-    this.availablePokemonIds = Array.from({ length: 50 }, (_, i) => i + 1);
     this.score = 0;
     this.message = '';
     this.gameFinished = false;
@@ -59,17 +60,15 @@ export class MainGameComponent implements OnInit {
   }
 
   fetchPokemon(): void {
-    if (this.availablePokemonIds.length === 0) {
+    if (this.score >= this.maxRounds) {
       this.gameFinished = true;
-      this.loading = false;
-      this.message = 'Game over! You have guessed all Pokémon.';
+      this.message = 'Game Over! You have reached the maximum rounds.';
       return;
     }
 
     this.resetUI();
 
-    const randomIndex = Math.floor(Math.random() * this.availablePokemonIds.length);
-    const randomId = this.availablePokemonIds.splice(randomIndex, 1)[0];
+    const randomId = Math.floor(Math.random() * this.totalPokemon) + 1;
     this.currentPokemonId = randomId;
 
     this.pokemonService.fetchPokemonById(randomId).subscribe((response) => {
