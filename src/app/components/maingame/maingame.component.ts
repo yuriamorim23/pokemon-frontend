@@ -20,6 +20,8 @@ export class MainGameComponent implements OnInit {
   revealPokemon: boolean = false;
   isCorrect: boolean = false;
   isWrong: boolean = false;
+  availablePokemonIds: number[] = Array.from({ length: 50 }, (_, i) => i + 1);
+  gameFinished: boolean = false;
 
   constructor(private pokemonService: PokemonService) {}
 
@@ -28,16 +30,26 @@ export class MainGameComponent implements OnInit {
   }
 
   fetchRandomPokemon(): void {
+    if (this.availablePokemonIds.length === 0) {
+      this.gameFinished = true;
+      this.loading = false;
+      this.message = 'Game over! You have guessed all Pokémon.';
+      return;
+    }
+
     this.message = '';
     this.loading = true;
     this.disableOptions = true;
     this.revealPokemon = false;
 
+    const randomIndex = Math.floor(Math.random() * this.availablePokemonIds.length);
+    const randomId = this.availablePokemonIds.splice(randomIndex, 1)[0];
+
     this.pokemonService.fetchRandomPokemon().subscribe((response) => {
       this.silhouetteUrl = response.silhouetteImageUrl;
       this.options = response.options;
       this.currentPokemonId = response.id;
-      
+
       setTimeout(() => {
         this.loading = false;
         this.disableOptions = false;
@@ -47,10 +59,10 @@ export class MainGameComponent implements OnInit {
 
   verifyGuess(guess: string): void {
     this.disableOptions = true;
-  
+
     this.pokemonService.verifyGuess(this.currentPokemonId, guess).subscribe((result) => {
       this.revealPokemon = true;
-  
+
       if (result.correct) {
         this.message = `🎉 Correct! The Pokémon is ${result.trueName}. 🎉`;
         this.score++;
@@ -61,12 +73,20 @@ export class MainGameComponent implements OnInit {
         this.isCorrect = false;
         this.isWrong = true;
       }
-  
+
       setTimeout(() => {
         this.isCorrect = false;
         this.isWrong = false;
         this.fetchRandomPokemon();
       }, 1500);
     });
+  }
+
+  restartGame(): void {
+    this.availablePokemonIds = Array.from({ length: 50 }, (_, i) => i + 1); // Reinicia os IDs
+    this.score = 0;
+    this.message = '';
+    this.gameFinished = false;
+    this.fetchRandomPokemon();
   }
 }
