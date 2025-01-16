@@ -4,8 +4,6 @@ import { Observable } from "rxjs";
 import { PokemonResponse } from "../models/pokemon-response.model";
 import { GuessResponse } from "../models/guess-response.model";
 
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -14,8 +12,8 @@ export class PokemonService {
 
   constructor(private http: HttpClient) {}
 
-  fetchRandomPokemon(): Observable<PokemonResponse> {
-    return this.http.get<PokemonResponse>(`${this.apiUrl}/random`);
+  fetchPokemonById(id: number): Observable<PokemonResponse> {
+    return this.http.get<PokemonResponse>(`${this.apiUrl}/${id}`);
   }
 
   verifyGuess(id: number, guess: string): Observable<GuessResponse> {

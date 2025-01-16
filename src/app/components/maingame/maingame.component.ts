@@ -2,6 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { PokemonService } from '../../services/pokemon.service';
 import { CommonModule } from '@angular/common';
 
+enum AnswerState {
+  Correct,
+  Wrong,
+  None
+}
+
 @Component({
   selector: 'app-maingame',
   standalone: true,
@@ -18,18 +24,41 @@ export class MainGameComponent implements OnInit {
   loading: boolean = false;
   disableOptions: boolean = false;
   revealPokemon: boolean = false;
-  isCorrect: boolean = false;
-  isWrong: boolean = false;
-  availablePokemonIds: number[] = Array.from({ length: 50 }, (_, i) => i + 1);
+  answerState: AnswerState = AnswerState.None;
+  availablePokemonIds: number[] = [];
   gameFinished: boolean = false;
+  answerStateEnum = AnswerState; // Exposing AnswerState for the template
 
   constructor(private pokemonService: PokemonService) {}
 
   ngOnInit(): void {
-    this.fetchRandomPokemon();
+    this.resetGame();
   }
 
-  fetchRandomPokemon(): void {
+  resetGame(): void {
+    this.availablePokemonIds = Array.from({ length: 50 }, (_, i) => i + 1);
+    this.score = 0;
+    this.message = '';
+    this.gameFinished = false;
+    this.fetchPokemon();
+  }
+
+  resetUI(): void {
+    this.message = '';
+    this.loading = true;
+    this.disableOptions = true;
+    this.revealPokemon = false;
+  }
+
+  setTemporaryState(duration: number): void {
+    setTimeout(() => {
+      this.loading = false;
+      this.disableOptions = false;
+      this.answerState = AnswerState.None;
+    }, duration);
+  }
+
+  fetchPokemon(): void {
     if (this.availablePokemonIds.length === 0) {
       this.gameFinished = true;
       this.loading = false;
@@ -37,23 +66,16 @@ export class MainGameComponent implements OnInit {
       return;
     }
 
-    this.message = '';
-    this.loading = true;
-    this.disableOptions = true;
-    this.revealPokemon = false;
+    this.resetUI();
 
     const randomIndex = Math.floor(Math.random() * this.availablePokemonIds.length);
     const randomId = this.availablePokemonIds.splice(randomIndex, 1)[0];
+    this.currentPokemonId = randomId;
 
-    this.pokemonService.fetchRandomPokemon().subscribe((response) => {
-      this.silhouetteUrl = response.silhouetteImageUrl;
-      this.options = response.options;
-      this.currentPokemonId = response.id;
-
-      setTimeout(() => {
-        this.loading = false;
-        this.disableOptions = false;
-      }, 1000);
+    this.pokemonService.fetchPokemonById(randomId).subscribe((response) => {
+      this.silhouetteUrl = response.imageUrl;
+      this.options = [...response.options]; // Garante que as opções corretas do backend são usadas
+      this.setTemporaryState(1000);
     });
   }
 
@@ -62,31 +84,15 @@ export class MainGameComponent implements OnInit {
 
     this.pokemonService.verifyGuess(this.currentPokemonId, guess).subscribe((result) => {
       this.revealPokemon = true;
+      this.answerState = result.correct ? AnswerState.Correct : AnswerState.Wrong;
+      this.message = result.correct 
+        ? `🎉 Correct! The Pokémon is ${result.trueName}. 🎉`
+        : `😢 Wrong! The correct Pokémon was ${result.trueName}. 😢`;
+      
+      if (result.correct) this.score++;
 
-      if (result.correct) {
-        this.message = `🎉 Correct! The Pokémon is ${result.trueName}. 🎉`;
-        this.score++;
-        this.isCorrect = true;
-        this.isWrong = false;
-      } else {
-        this.message = `😢 Wrong! The correct Pokémon was ${result.trueName}. 😢`;
-        this.isCorrect = false;
-        this.isWrong = true;
-      }
-
-      setTimeout(() => {
-        this.isCorrect = false;
-        this.isWrong = false;
-        this.fetchRandomPokemon();
-      }, 1500);
+      this.setTemporaryState(1500);
+      setTimeout(() => this.fetchPokemon(), 1500);
     });
-  }
-
-  restartGame(): void {
-    this.availablePokemonIds = Array.from({ length: 50 }, (_, i) => i + 1); // Reinicia os IDs
-    this.score = 0;
-    this.message = '';
-    this.gameFinished = false;
-    this.fetchRandomPokemon();
   }
 }

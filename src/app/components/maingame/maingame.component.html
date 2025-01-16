@@ -12,7 +12,11 @@
 
   <div *ngIf="!loading && !gameFinished" class="game-content">
     <div class="silhouette">
-      <img [src]="silhouetteUrl" [ngClass]="{ 'reveal': revealPokemon }" alt="Pokemon Silhouette" draggable="false" />
+      <img 
+        [src]="silhouetteUrl" 
+        [ngClass]="{ 'reveal': revealPokemon }" 
+        alt="Pokemon Silhouette" 
+        draggable="false" />
     </div>    
 
     <div class="options">
@@ -26,13 +30,14 @@
       </button>
     </div>
 
-    <div class="message" [ngClass]="{ 'correct': message.includes('Correct'), 'wrong': message.includes('Wrong') }">
+    <div class="message" 
+      [ngClass]="{ 'correct': answerState === answerStateEnum.Correct, 'wrong': answerState === answerStateEnum.Wrong }">
       <p>{{ message }}</p>
     </div>
   </div>
 
   <div *ngIf="gameFinished" class="game-over">
     <p>{{ message }}</p>
-    <button (click)="restartGame()" class="btn btn-success">Restart Game</button>
+    <button (click)="resetGame()" class="btn btn-success">Restart Game</button>
   </div>
 </div>
