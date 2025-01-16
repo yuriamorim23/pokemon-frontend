@@ -26,14 +26,20 @@ export class MainGameComponent implements OnInit {
   revealPokemon: boolean = false;
   answerState: AnswerState = AnswerState.None;
   gameFinished: boolean = false;
-  answerStateEnum = AnswerState; // Exposing AnswerState for the template
+  gameStarted: boolean = false; // Controls if the game has started
+  answerStateEnum = AnswerState; 
 
-  private maxRounds: number = 20; // Define um limite para o jogo
-  private totalPokemon: number = 150; // Define o total de Pokémons disponíveis
+  private totalPokemon: number = 150;
+  private timerDuration: number = 120;
+  timeLeft: number = this.timerDuration;
+  private timer: any;
 
   constructor(private pokemonService: PokemonService) {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  startGame(): void {
+    this.gameStarted = true;
     this.resetGame();
   }
 
@@ -41,6 +47,8 @@ export class MainGameComponent implements OnInit {
     this.score = 0;
     this.message = '';
     this.gameFinished = false;
+    this.timeLeft = this.timerDuration;
+    this.startTimer();
     this.fetchPokemon();
   }
 
@@ -59,10 +67,25 @@ export class MainGameComponent implements OnInit {
     }, duration);
   }
 
+  startTimer(): void {
+    clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      if (this.timeLeft > 0) {
+        this.timeLeft--;
+      } else {
+        this.endGame();
+      }
+    }, 1000);
+  }
+
+  endGame(): void {
+    clearInterval(this.timer);
+    this.gameFinished = true;
+    this.message = '⏳ Time is up! Game Over!';
+  }
+
   fetchPokemon(): void {
-    if (this.score >= this.maxRounds) {
-      this.gameFinished = true;
-      this.message = 'Game Over! You have reached the maximum rounds.';
+    if (this.gameFinished) {
       return;
     }
 
@@ -73,12 +96,16 @@ export class MainGameComponent implements OnInit {
 
     this.pokemonService.fetchPokemonById(randomId).subscribe((response) => {
       this.silhouetteUrl = response.imageUrl;
-      this.options = [...response.options]; // Garante que as opções corretas do backend são usadas
+      this.options = [...response.options];
       this.setTemporaryState(1000);
     });
   }
 
   verifyGuess(guess: string): void {
+    if (this.gameFinished) {
+      return;
+    }
+
     this.disableOptions = true;
 
     this.pokemonService.verifyGuess(this.currentPokemonId, guess).subscribe((result) => {
@@ -93,5 +120,11 @@ export class MainGameComponent implements OnInit {
       this.setTemporaryState(1500);
       setTimeout(() => this.fetchPokemon(), 1500);
     });
+  }
+
+  formatTime(time: number): string {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
 }

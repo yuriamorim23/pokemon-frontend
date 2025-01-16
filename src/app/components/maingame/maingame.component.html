@@ -1,43 +1,52 @@
 <div class="game-container">
   <h1 class="title">Who's That Pokémon?</h1>
 
-  <div class="score">
-    <p>Score: <span>{{ score }}</span></p>
+  <!-- Show Start Game button if game hasn't started -->
+  <div *ngIf="!gameStarted" class="start-screen">
+    <button (click)="startGame()" class="btn btn-primary start-button">Start Game</button>
   </div>
 
-  <div *ngIf="loading" class="loading">
-    <div class="pokeball"></div>
-    <p>Loading...</p>
-  </div>
-
-  <div *ngIf="!loading && !gameFinished" class="game-content">
-    <div class="silhouette">
-      <img 
-        [src]="silhouetteUrl" 
-        [ngClass]="{ 'reveal': revealPokemon }" 
-        alt="Pokemon Silhouette" 
-        draggable="false" />
-    </div>    
-
-    <div class="options">
-      <button
-        *ngFor="let option of options"
-        (click)="verifyGuess(option)"
-        [disabled]="disableOptions"
-        class="btn btn-outline-primary"
-      >
-        {{ option }}
-      </button>
+  <!-- Game Content: Only visible when game starts -->
+  <div *ngIf="gameStarted">
+    <div class="score-timer">
+      <p class="score">Score: <span class="points">{{ score }}</span></p>
+      <p class="timer">Time Left: <span class="count">{{ formatTime(timeLeft) }}</span></p>
     </div>
 
-    <div class="message" 
-      [ngClass]="{ 'correct': answerState === answerStateEnum.Correct, 'wrong': answerState === answerStateEnum.Wrong }">
+    <div *ngIf="loading" class="loading">
+      <div class="pokeball"></div>
+      <p>Loading...</p>
+    </div>
+
+    <div *ngIf="!loading && !gameFinished" class="game-content">
+      <div class="silhouette">
+        <img 
+          [src]="silhouetteUrl" 
+          [ngClass]="{ 'reveal': revealPokemon }" 
+          alt="Pokemon Silhouette" 
+          draggable="false" />
+      </div>    
+
+      <div class="options">
+        <button
+          *ngFor="let option of options"
+          (click)="verifyGuess(option)"
+          [disabled]="disableOptions"
+          class="btn btn-outline-primary"
+        >
+          {{ option }}
+        </button>
+      </div>
+
+      <div class="message" 
+        [ngClass]="{ 'correct': answerState === answerStateEnum.Correct, 'wrong': answerState === answerStateEnum.Wrong }">
+        <p>{{ message }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="gameFinished" class="game-over">
       <p>{{ message }}</p>
+      <button (click)="resetGame()" class="btn btn-success">Restart Game</button>
     </div>
-  </div>
-
-  <div *ngIf="gameFinished" class="game-over">
-    <p>{{ message }}</p>
-    <button (click)="resetGame()" class="btn btn-success">Restart Game</button>
   </div>
 </div>
